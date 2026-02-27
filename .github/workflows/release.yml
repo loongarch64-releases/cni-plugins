@@ -1,4 +1,4 @@
-name: coredns/coredns
+name: containernetworking/plugins
 
 on:
   schedule:
@@ -26,8 +26,8 @@ jobs:
         id: check
         run: |
           # 1. 获取上游最新版本
-          LATEST_VERSION=$(curl -s https://api.github.com/repos/${{ env.UPSTREAM_ORG }}/${{ env.UPSTREAM_REPO }}/releases/latest | jq -r ".tag_name")
-          echo "Latest upstream coredns version: $LATEST_VERSION"
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/${UPSTREAM_ORG}/${UPSTREAM_REPO}/releases/latest | jq -r ".tag_name")
+          echo "Latest upstream ${UPSTREAM_ORG}/${UPSTREAM_REPO} version: $LATEST_VERSION"
           LATEST_VERSION=${LATEST_VERSION#v}
 
           # 2. 检查本仓库是否已存在该 Release
@@ -56,7 +56,7 @@ jobs:
       - name: Build Builer Image
         run: |
           docker buildx build --platform linux/loong64 \
-            -t ${{ env.UPSTREAM_REPO }}-builder . --load
+            -t ${UPSTREAM_REPO}-builder . --load
 
       - name: Build Release
         run: |
@@ -67,7 +67,7 @@ jobs:
             --platform linux/loong64 \
             -v $(pwd):/workspace \
             -e PLUGINS_VERSION=$VERSION \
-            ${{ env.UPSTREAM_REPO }}-builder
+            ${UPSTREAM_REPO}-builder
 
       - name: Upload Release
         env:
@@ -77,5 +77,5 @@ jobs:
           gh release create "$VERSION" \
             --title "cni-plugins $VERSION" \
             --notes "Automated build for version $VERSION based on ${{ env.UPSTREAM_OWNER }}/${{ env.UPSTREAM_REPO }}" \
-            dists/${{ env.UPSTREAM_REPO }}-$VERSION/*
+            dists/${UPSTREAM_REPO}-$VERSION/*
 
