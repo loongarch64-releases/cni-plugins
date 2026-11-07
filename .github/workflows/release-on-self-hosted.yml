@@ -1,6 +1,8 @@
 name: Auto Build cni-plugins (Self hosted)
 
 on:
+  schedule:
+    - cron: '33 1 * * *'
   workflow_dispatch:
 
 env:
